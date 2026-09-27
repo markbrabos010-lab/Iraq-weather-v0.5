@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طقس الكاظمية الاحترافي</title>
-    <!-- استدعاء خط Cairo المتناسق والمودرن -->
+    <title>طقس العراق - كل المحافظات</title>
+    <!-- خط Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <!-- مكتبة Lucide للأيقونات النظيفة -->
+    <!-- مكتبة Lucide للأيقونات -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -47,7 +47,39 @@
             gap: 20px;
         }
 
-        /* 1. الهيدر الرئيسي */
+        /* قائمة اختيار المحافظات */
+        .city-selector-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+
+        .city-select {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
+        }
+
+        .city-select:hover {
+            background: var(--glass-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .city-select option {
+            background: #10192d;
+            color: var(--text-primary);
+        }
+
+        /* الهيدر الرئيسي */
         .main-header {
             text-align: center;
             padding: 10px 0;
@@ -60,7 +92,6 @@
         .city-name {
             font-size: 2.2rem;
             font-weight: 800;
-            letter-spacing: -0.5px;
         }
 
         .temp-main {
@@ -81,7 +112,7 @@
             gap: 8px;
         }
 
-        /* 2. حاوية العرض المخصص (Cards Wrapper) */
+        /* الكروت */
         .card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
@@ -102,13 +133,14 @@
             gap: 8px;
         }
 
-        /* 3. شريط الساعات - يبدأ من الوقت الحالي */
+        /* شريط الساعات */
         .hourly-scroll {
             display: flex;
             gap: 12px;
             overflow-x: auto;
             padding-bottom: 8px;
             scroll-behavior: smooth;
+            direction: rtl;
         }
 
         .hourly-scroll::-webkit-scrollbar {
@@ -139,23 +171,7 @@
             transform: translateY(-2px);
         }
 
-        .hour-card:hover {
-            background: var(--glass-hover);
-            transform: translateY(-4px);
-        }
-
-        .hour-time {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .hour-temp {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        /* 4. شبكة البطاقات التفصيلية */
+        /* شبكة التفاصيل */
         .details-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -187,7 +203,6 @@
             color: var(--text-secondary);
         }
 
-        /* لمسة قوس الشمس الشفافة */
         .sun-arc {
             width: 100%;
             height: 40px;
@@ -208,7 +223,7 @@
             left: 30%;
         }
 
-        /* الإلغاء الصارم والنهائي للقائمة السفلية */
+        /* إلغاء القوائم السفلية */
         .bottom-nav, footer, .navigation-bar {
             display: none !important;
         }
@@ -217,119 +232,192 @@
 <body>
 
     <div class="weather-app">
-        <!-- الهيدر والطقس الحالي -->
+        
+        <!-- قائمة اختيار المحافظة -->
+        <div class="city-selector-container">
+            <select id="citySelect" class="city-select" onchange="changeCity()">
+                <option value="33.38,44.34,الكاظمية">الكاظمية (بغداد)</option>
+                <option value="33.31,44.36,بغداد">بغداد</option>
+                <option value="30.51,47.81,البصرة">البصرة</option>
+                <option value="36.34,43.13,الموصل">الموصل (نينوى)</option>
+                <option value="36.19,44.01,أربيل">أربيل</option>
+                <option value="35.55,45.43,السليمانية">السليمانية</option>
+                <option value="36.86,42.98,دهوك">دهوك</option>
+                <option value="35.47,44.39,كركوك">كركوك</option>
+                <option value="32.01,44.33,النجف الأشرف">النجف الأشرف</option>
+                <option value="32.61,44.02,كربلاء المقدسة">كربلاء المقدسة</option>
+                <option value="32.48,44.43,الحلة (بابل)">الحلة (بابل)</option>
+                <option value="31.05,46.25,الناصرية (ذي قار)">الناصرية (ذي قار)</option>
+                <option value="31.99,44.92,الديوانية (القادسية)">الديوانية (القادسية)</option>
+                <option value="31.83,47.14,العمارة (ميسان)">العمارة (ميسان)</option>
+                <option value="31.31,45.28,السماوة (المثنى)">السماوة (المثنى)</option>
+                <option value="32.51,45.83,الكوت (واسط)">الكوت (واسط)</option>
+                <option value="33.75,45.14,بعقوبة (ديالى)">بعقوبة (ديالى)</option>
+                <option value="33.42,43.30,الرمادي (الأنبار)">الرمادي (الأنبار)</option>
+                <option value="34.60,43.68,تكريت (صلاح الدين)">تكريت (صلاح الدين)</option>
+                <option value="33.80,42.45,هيت">هيت</option>
+                <option value="34.40,40.95,القائم">القائم</option>
+                <option value="30.03,47.93,الفاو">الفاو</option>
+                <option value="36.31,41.86,سنجار">سنجار</option>
+                <option value="34.35,45.38,خانقين">خانقين</option>
+                <option value="35.01,44.64,طوزخورماتو">طوزخورماتو</option>
+                <option value="32.06,44.40,الكوفة">الكوفة</option>
+                <option value="32.55,44.00,الهندية">الهندية</option>
+                <option value="33.27,44.23,أبو غريب">أبو غريب</option>
+                <option value="33.55,44.25,التاجي">التاجي</option>
+                <option value="33.02,44.53,المحمودية">المحمودية</option>
+                <option value="31.52,46.10,الشطرة">الشطرة</option>
+                <option value="30.22,47.01,الزبير">الزبير</option>
+                <option value="30.48,47.69,القرنة">القرنة</option>
+                <option value="36.67,43.83,عقرة">عقرة</option>
+                <option value="36.83,44.07,العمادية">العمادية</option>
+                <option value="36.65,44.53,سوران">سوران</option>
+                <option value="35.50,45.96,حلبجة">حلبجة</option>
+                <option value="34.88,43.48,سامراء">سامراء</option>
+                <option value="33.54,43.27,الفلوجة">الفلوجة</option>
+                <option value="34.05,42.38,حديثة">حديثة</option>
+            </select>
+        </div>
+
+        <!-- الهيدر -->
         <div class="main-header">
-            <h1 class="city-name">الكاظمية</h1>
-            <div class="temp-main">34°</div>
+            <h1 class="city-name" id="cityName">الكاظمية</h1>
+            <div class="temp-main" id="currentTemp">--°</div>
             <div class="weather-status">
-                <i data-lucide="moon"></i>
-                <span>صافٍ • العليا: 43° | الدنيا: 26°</span>
+                <i data-lucide="moon" id="mainStatusIcon"></i>
+                <span id="headerStatus">جاري جلب الطقس...</span>
             </div>
         </div>
 
-        <!-- توقعات الساعات (تبدأ تلقائياً من الساعة الحالية) -->
+        <!-- الساعات -->
         <div class="card">
             <div class="section-title">
                 <i data-lucide="clock" size="18"></i>
                 <span>الطقس كل ساعة (بدءاً من الوقت الحالي)</span>
             </div>
             <div class="hourly-scroll" id="hourlyContainer">
-                <!-- ينشأ الكود هنا تلقائياً بواسطة JS -->
+                <!-- ينشأ هنا -->
             </div>
         </div>
 
-        <!-- شبكة التفاصيل والمؤشرات المفصلة -->
+        <!-- شبكة التفاصيل -->
         <div class="details-grid">
-            <!-- الشروق والغروب -->
             <div class="card detail-item">
                 <div class="detail-header">
                     <i data-lucide="sundial" size="18"></i>
                     <span>الشروق والغروب</span>
                 </div>
-                <div class="detail-value">05:04 <span style="font-size: 1rem;">ص</span></div>
+                <div class="detail-value" id="sunriseVal">--:--</div>
                 <div class="sun-arc"><div class="sun-dot"></div></div>
-                <div class="detail-desc">غروب الشمس: 05:52 م</div>
+                <div class="detail-desc" id="sunsetVal">غروب الشمس: --:--</div>
             </div>
 
-            <!-- الرطوبة -->
             <div class="card detail-item">
                 <div class="detail-header">
                     <i data-lucide="droplets" size="18"></i>
                     <span>الرطوبة</span>
                 </div>
-                <div class="detail-value">34%</div>
-                <div class="detail-desc" style="margin-top: auto;">الطقس معتدل ومريح حالياً</div>
+                <div class="detail-value" id="humidityVal">--%</div>
+                <div class="detail-desc">الطقس حالياً</div>
             </div>
 
-            <!-- فرص المطر -->
             <div class="card detail-item">
                 <div class="detail-header">
                     <i data-lucide="cloud-rain" size="18"></i>
-                    <span>توقع المطر القادم</span>
+                    <span>فرصة المطر</span>
                 </div>
-                <div class="detail-value">0%</div>
-                <div class="detail-desc" style="margin-top: auto;">فرصة هطول أمطار ضئيلة جداً</div>
+                <div class="detail-value" id="rainVal">0%</div>
+                <div class="detail-desc">احتمالية الهطول</div>
             </div>
 
-            <!-- الضغط الجوي -->
             <div class="card detail-item">
                 <div class="detail-header">
                     <i data-lucide="gauge" size="18"></i>
                     <span>الضغط الجوي</span>
                 </div>
-                <div class="detail-value">1001 <span style="font-size: 0.9rem;">hPa</span></div>
-                <div class="detail-desc" style="margin-top: auto;">ضغط الهواء طبيعي ومستقر</div>
+                <div class="detail-value" id="pressureVal">-- <span style="font-size: 0.9rem;">hPa</span></div>
+                <div class="detail-desc">ضغط الهواء طبيعي ومستقر</div>
             </div>
         </div>
+
     </div>
 
     <script>
-        // دالة إنشاء توقعات الساعات بدءاً من الساعة الحالية للجهاز
-        function generateHourlyData() {
-            const container = document.getElementById('hourlyContainer');
-            container.innerHTML = '';
+        let currentLat = 33.38;
+        let currentLon = 44.34;
 
-            const now = new Date();
-            const currentHour = now.getHours(); // جلب الساعة الحالية (0-23)
-
-            // محاكاة درجات الحرارة والأيقونات للـ 24 ساعة القادمة
-            const baseTemps = [27, 26, 27, 30, 33, 35, 37, 39, 42, 43, 43, 39, 37, 35, 34, 32, 31, 30, 29, 28, 28, 27, 26, 26];
-
-            for (let i = 0; i < 15; i++) {
-                let hour = (currentHour + i) % 24;
-                let isNow = i === 0;
-                
-                // تنسيق ص/م
-                let ampm = hour >= 12 ? 'م' : 'ص';
-                let displayHour = hour % 12;
-                displayHour = displayHour ? displayHour : 12; 
-                let timeText = isNow ? 'الآن' : `${displayHour} ${ampm}`;
-
-                // اختيار الأيقونة حسب الليل والنهار
-                let iconName = (hour >= 6 && hour < 18) ? 'sun' : 'moon';
-                if (hour === 5) iconName = 'sunrise';
-                if (hour === 18) iconName = 'sunset';
-
-                let temp = baseTemps[hour] || 32;
-
-                // بناء عنصر الساعة
-                const hourCard = document.createElement('div');
-                hourCard.className = `hour-card ${isNow ? 'active' : ''}`;
-                hourCard.innerHTML = `
-                    <span class="hour-time">${timeText}</span>
-                    <i data-lucide="${iconName}" size="22" style="color: ${iconName.includes('sun') ? '#fbc02d' : '#e2e8f0'}"></i>
-                    <span class="hour-temp">${temp}°</span>
-                `;
-
-                container.appendChild(hourCard);
-            }
-
-            // إعادة تهيئة الأيقونات
-            lucide.createIcons();
+        function changeCity() {
+            const select = document.getElementById('citySelect');
+            const [lat, lon, name] = select.value.split(',');
+            currentLat = parseFloat(lat);
+            currentLon = parseFloat(lon);
+            document.getElementById('cityName').innerText = name;
+            fetchWeatherData();
         }
 
-        // تشغيل الدالة عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', generateHourlyData);
+        async function fetchWeatherData() {
+            try {
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&current=temperature_2m,relative_humidity_2m,surface_pressure,precipitation_probability&hourly=temperature_2m,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto`);
+                const data = await response.json();
+
+                // 1. تحديث الطقس الحالي
+                const currentTemp = Math.round(data.current.temperature_2m);
+                const maxTemp = Math.round(data.daily.temperature_2m_max[0]);
+                const minTemp = Math.round(data.daily.temperature_2m_min[0]);
+                
+                document.getElementById('currentTemp').innerText = `${currentTemp}°`;
+                document.getElementById('headerStatus').innerText = `صافٍ • العليا: ${maxTemp}° | الدنيا: ${minTemp}°`;
+                document.getElementById('humidityVal').innerText = `${data.current.relative_humidity_2m}%`;
+                document.getElementById('pressureVal').innerHTML = `${Math.round(data.current.surface_pressure)} <span style="font-size: 0.9rem;">hPa</span>`;
+                document.getElementById('rainVal').innerText = `${data.current.precipitation_probability || 0}%`;
+
+                // الشروق والغروب
+                const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
+                const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('sunriseVal').innerText = sunrise;
+                document.getElementById('sunsetVal').innerText = `غروب الشمس: ${sunset}`;
+
+                // 2. تحديث الساعات تبدأ فوراً من "الآن"
+                const now = new Date();
+                const currentHour = now.getHours();
+
+                const container = document.getElementById('hourlyContainer');
+                container.innerHTML = '';
+
+                for (let i = 0; i < 24; i++) {
+                    const targetIndex = currentHour + i;
+                    if (targetIndex >= data.hourly.time.length) break;
+
+                    const timeStr = data.hourly.time[targetIndex];
+                    const hourDate = new Date(timeStr);
+                    const hourNum = hourDate.getHours();
+                    const temp = Math.round(data.hourly.temperature_2m[targetIndex]);
+
+                    let ampm = hourNum >= 12 ? 'م' : 'ص';
+                    let h12 = hourNum % 12 || 12;
+                    let label = (i === 0) ? 'الآن' : `${h12} ${ampm}`;
+
+                    let isDay = (hourNum >= 6 && hourNum < 18);
+                    let icon = isDay ? 'sun' : 'moon';
+
+                    const card = document.createElement('div');
+                    card.className = `hour-card ${i === 0 ? 'active' : ''}`;
+                    card.innerHTML = `
+                        <span class="hour-time">${label}</span>
+                        <i data-lucide="${icon}" size="22" style="color: ${isDay ? '#fbc02d' : '#e2e8f0'}"></i>
+                        <span class="hour-temp">${temp}°</span>
+                    `;
+                    container.appendChild(card);
+                }
+
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error("خطأ بجلب البيانات:", err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchWeatherData);
     </script>
 </body>
 </html>
