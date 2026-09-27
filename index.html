@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>طقس العراق الاحترافي - Moji-Style Weather</title>
-  <!-- Chart.js للرسم البياني لتوقعات درجات الحرارة -->
+  <title>طقس العراق</title>
+  
+  <!-- إعدادات التثبيت على الشاشة الرئيسية (PWA App) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="طقس العراق">
+  <meta name="theme-color" content="#0b1021">
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * {
@@ -36,7 +42,6 @@
       max-width: 900px;
     }
 
-    /* Top Selector */
     .header-select {
       display: flex;
       justify-content: center;
@@ -55,10 +60,9 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
 
-    /* Main Temp Section */
     .main-weather {
       text-align: center;
-      margin: 20px 0 30px 0;
+      margin: 15px 0 25px 0;
     }
 
     .city-title {
@@ -87,7 +91,6 @@
       margin-top: 5px;
     }
 
-    /* Cards Styling */
     .card {
       background: rgba(23, 32, 56, 0.75);
       backdrop-filter: blur(12px);
@@ -107,7 +110,7 @@
       gap: 6px;
     }
 
-    /* Hourly Forecast Scrollable */
+    /* Hourly Forecast */
     .hourly-container {
       display: flex;
       overflow-x: auto;
@@ -135,17 +138,35 @@
     .hourly-item .icon { font-size: 1.5rem; margin-bottom: 8px; }
     .hourly-item .temp { font-weight: 600; color: #f8fafc; }
 
-    /* Daily Forecast Section */
-    .chart-container {
-      height: 180px;
-      position: relative;
-      margin-top: 10px;
+    /* Daily List Above Chart */
+    .daily-header-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Grid Layout for Metrics */
+    .daily-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .daily-col .day-name { font-size: 0.85rem; color: #94a3b8; }
+    .daily-col .day-icon { font-size: 1.3rem; }
+    .daily-col .day-temp { font-size: 0.8rem; font-weight: bold; color: #e2e8f0; }
+
+    .chart-container {
+      height: 160px;
+      position: relative;
+    }
+
     .grid-2 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 15px;
     }
 
@@ -161,10 +182,9 @@
       color: #64748b;
     }
 
-    /* Lifestyle Recommendations Grid */
     .lifestyle-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 12px;
       text-align: center;
     }
@@ -179,20 +199,11 @@
     .lifestyle-item .icon { font-size: 1.8rem; margin-bottom: 6px; }
     .lifestyle-item .status { font-size: 0.75rem; color: #94a3b8; }
     .lifestyle-item .title { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; margin-top: 2px; }
-
-    .footer-note {
-      text-align: center;
-      color: #64748b;
-      font-size: 0.8rem;
-      margin-top: 20px;
-      padding-bottom: 20px;
-    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- قائمة اختيار مناطق العراق -->
     <div class="header-select">
       <select id="citySelect" onchange="fetchWeatherData()">
         <optgroup label="العاصمة والمناطق">
@@ -221,7 +232,6 @@
       </select>
     </div>
 
-    <!-- الطقس الحالي الرئيسية -->
     <div class="main-weather">
       <div class="city-title" id="cityName">Kadhimiya</div>
       <div class="current-temp" id="currentTemp">--°</div>
@@ -232,21 +242,29 @@
     <!-- الطقس كل ساعة -->
     <div class="card">
       <div class="card-title">🕒 الطقس كل ساعة</div>
-      <div class="hourly-container" id="hourlyContainer">
-        <!-- يتم التعبئة بواسطة الكود -->
-      </div>
+      <div class="hourly-container" id="hourlyContainer"></div>
     </div>
 
-    <!-- توقع الطقس للأيام القادمة والحرارة -->
+    <!-- توقع الأيام مع الأيقونات والمخطط -->
     <div class="card">
       <div class="card-title">📅 توقع الطقس (الأيام القادمة)</div>
+      
+      <!-- إظهار اسم اليوم والأيقونة والحرارة -->
+      <div class="daily-header-grid" id="dailyHeaderGrid"></div>
+
       <div class="chart-container">
         <canvas id="tempChart"></canvas>
       </div>
     </div>
 
-    <!-- بطاقات الرؤية والضغط والرطوبة والشروق -->
+    <!-- قسم توقعات الأمطار -->
     <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🌧️ توقع المطر القادم</div>
+        <div class="metric-value" id="rainProb">0%</div>
+        <div class="metric-desc" id="rainDesc">لا توجد فرصة هطول أمطار حالياً</div>
+      </div>
+
       <div class="card">
         <div class="card-title">🌅 الشروق والغروب</div>
         <div class="metric-value" id="sunriseTime">--:-- ص</div>
@@ -256,78 +274,57 @@
       <div class="card">
         <div class="card-title">💧 الرطوبة</div>
         <div class="metric-value" id="humidityVal">--%</div>
-        <div class="metric-desc" id="humidityDesc">الطقس جاف، احرص على ترطيب جسمك</div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">👁️ الرؤية الأفقیة</div>
-        <div class="metric-value" id="visibilityVal">-- كم</div>
-        <div class="metric-desc">رؤية ممتازة ومجال واضح</div>
+        <div class="metric-desc" id="humidityDesc">الطقس معتدل ومريح</div>
       </div>
 
       <div class="card">
         <div class="card-title">⏲️ الضغط الجوي</div>
         <div class="metric-value" id="pressureVal">-- hPa</div>
-        <div class="metric-desc">ضغط الهواء طبيعي، الطقس مريح</div>
+        <div class="metric-desc">ضغط الهواء طبيعي</div>
       </div>
     </div>
 
-    <!-- مؤشرات نمط الحياة والتوصيات -->
+    <!-- الأنشطة والتوصيات -->
     <div class="card">
       <div class="card-title">🚴 مؤشرات نمط الحياة والأنشطة</div>
       <div class="lifestyle-grid">
         <div class="lifestyle-item">
           <div class="icon">🏃</div>
           <div class="status" id="runStatus">مناسب</div>
-          <div class="title">الجري والرياضة</div>
+          <div class="title">الرياضة</div>
         </div>
         <div class="lifestyle-item">
           <div class="icon">🎣</div>
-          <div class="status" id="fishStatus">غير مناسب</div>
+          <div class="status">غير مناسب</div>
           <div class="title">صيد السمك</div>
         </div>
         <div class="lifestyle-item">
           <div class="icon">🔭</div>
-          <div class="status" id="starStatus">مثالي</div>
+          <div class="status">مثالي</div>
           <div class="title">مراقبة النجوم</div>
-        </div>
-        <div class="lifestyle-item">
-          <div class="icon">💆</div>
-          <div class="status">احتمالية ضئيلة</div>
-          <div class="title">تجهد الشعر</div>
         </div>
         <div class="lifestyle-item">
           <div class="icon">✈️</div>
           <div class="status">لا تأخيرات</div>
           <div class="title">الرحلات الجوية</div>
         </div>
-        <div class="lifestyle-item">
-          <div class="icon">🌙</div>
-          <div class="status" id="moonStatus">بدر</div>
-          <div class="title">مرحلة القمر</div>
-        </div>
       </div>
-    </div>
-
-    <div class="footer-note">
-      البيانات مقدمة مباشرة عن طريق Open-Meteo API | طقس العراق 🇮🇶
     </div>
   </div>
 
   <script>
     let tempChartInstance = null;
 
-    // خرائط الإيموجي للطقس
     function getWeatherEmoji(code, isDay = 1) {
-      if (code === 0) return isDay ? "☀️ مشمس" : "🌙 صافٍ";
-      if (code === 1 || code === 2) return isDay ? "🌤️ صافٍ بوجه عام" : "🌤️ غائم جزئياً";
-      if (code === 3) return "☁️ غائم";
-      if (code >= 45 && code <= 48) return "🌫️ ضباب";
-      if (code >= 51 && code <= 65) return "🌧️ مطر";
-      if (code >= 71 && code <= 77) return "❄️ ثلج/بارد جداً";
-      if (code >= 80 && code <= 82) return "🌦️ زخات مطر";
-      if (code >= 95) return "🌩️ عاصفة رعدية";
-      return "☀️ مشمس";
+      if (code === 0) return isDay ? "☀️" : "🌙";
+      if (code === 1 || code === 2) return isDay ? "🌤️" : "🌤️";
+      if (code === 3) return "☁️";
+      if (code >= 45 && code <= 48) return "🌫️";
+      if (code >= 51 && code <= 65) return "🌧️";
+      if (code >= 71 && code <= 77) return "❄️";
+      if (code >= 80 && code <= 82) return "🌦️";
+      if (code >= 95) return "🌩️";
+      return "☀️";
     }
 
     async function fetchWeatherData() {
@@ -338,7 +335,7 @@
       document.getElementById("cityName").innerText = cityName;
 
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,is_day,weather_code,surface_pressure,wind_speed_10m&hourly=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code&timezone=auto`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,is_day,weather_code,surface_pressure&hourly=temperature_2m,weather_code,is_day,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_probability_max,precipitation_sum&timezone=auto`;
         
         const response = await fetch(url);
         const data = await response.json();
@@ -351,16 +348,15 @@
         document.getElementById("minTemp").innerText = Math.round(data.daily.temperature_2m_min[0]);
         
         const cond = getWeatherEmoji(current.weather_code, current.is_day);
-        document.getElementById("conditionText").innerText = cond;
+        document.getElementById("conditionText").innerText = cond === "☀️" ? "مشمس ☀️" : "متقلب";
 
         // 2. الساعات
         const hourlyContainer = document.getElementById("hourlyContainer");
         hourlyContainer.innerHTML = "";
-        
         for (let i = 0; i < 24; i += 2) {
           const time = new Date(data.hourly.time[i]).getHours() + ":00";
           const temp = Math.round(data.hourly.temperature_2m[i]);
-          const emoji = getWeatherEmoji(data.hourly.weather_code[i], data.hourly.is_day[i]).split(" ")[0];
+          const emoji = getWeatherEmoji(data.hourly.weather_code[i], data.hourly.is_day[i]);
 
           hourlyContainer.innerHTML += `
             <div class="hourly-item">
@@ -371,7 +367,36 @@
           `;
         }
 
-        // 3. الشروق، الغروب، الرطوبة، الضغط
+        // 3. توقع المطر
+        const rainProb = data.daily.precipitation_probability_max[0] || 0;
+        const rainSum = data.daily.precipitation_sum[0] || 0;
+        document.getElementById("rainProb").innerText = `${rainProb}%`;
+        if (rainProb > 40) {
+          document.getElementById("rainDesc").innerText = `متوقع هطول أمطار بنسبة ${rainProb}% (كمية: ${rainSum} ملم)`;
+        } else {
+          document.getElementById("rainDesc").innerText = "فرصة الأمطار ضئيلة جداً اليوم";
+        }
+
+        // 4. بناء شبكة الأيام بالأيقونات والأسماء
+        const dailyHeaderGrid = document.getElementById("dailyHeaderGrid");
+        dailyHeaderGrid.innerHTML = "";
+        
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(data.daily.time[i]);
+          const dayName = d.toLocaleDateString('ar-IQ', { weekday: 'short' });
+          const emoji = getWeatherEmoji(data.daily.weather_code[i]);
+          const max = Math.round(data.daily.temperature_2m_max[i]);
+
+          dailyHeaderGrid.innerHTML += `
+            <div class="daily-col">
+              <span class="day-name">${dayName}</span>
+              <span class="day-icon">${emoji}</span>
+              <span class="day-temp">${max}°</span>
+            </div>
+          `;
+        }
+
+        // 5. الشروق والغروب والرطوبة والضغط
         const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'});
         const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'});
         
@@ -379,21 +404,7 @@
         document.getElementById("sunsetTime").innerText = sunset;
         document.getElementById("humidityVal").innerText = `${current.relative_humidity_2m}%`;
         document.getElementById("pressureVal").innerText = `${Math.round(current.surface_pressure)} hPa`;
-        document.getElementById("visibilityVal").innerText = `10 كم`;
 
-        // تعديل حالة الأنشطة حسب الحرارة
-        if (currentTemp > 38) {
-          document.getElementById("runStatus").innerText = "غير مناسب 🥵";
-          document.getElementById("humidityDesc").innerText = "الطقس حار جداً، اشرب الكثير من الماء";
-        } else if (currentTemp < 15) {
-          document.getElementById("runStatus").innerText = "بارد 🥶";
-          document.getElementById("humidityDesc").innerText = "الطقس بارد، ارتدي ملابس دافئة";
-        } else {
-          document.getElementById("runStatus").innerText = "ممتاز 🏃";
-          document.getElementById("humidityDesc").innerText = "الطقس معتدل ومريح";
-        }
-
-        // 4. الرسم البياني لـ 7 أيام
         renderDailyChart(data.daily);
 
       } catch (err) {
@@ -440,18 +451,15 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
+          plugins: { legend: { display: false } },
           scales: {
-            x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+            x: { display: false },
             y: { display: false }
           }
         }
       });
     }
 
-    // جلب البيانات فور فتح التطبيق
     window.onload = fetchWeatherData;
   </script>
 </body>
