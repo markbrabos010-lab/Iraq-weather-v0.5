@@ -3,237 +3,456 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>طقس العراق - Iraq Weather</title>
+  <title>طقس العراق الاحترافي - Moji-Style Weather</title>
+  <!-- Chart.js للرسم البياني لتوقعات درجات الحرارة -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
+
     body {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: #f8fafc;
+      background: #0b1021;
+      background-image: 
+        radial-gradient(2px 2px at 20px 30px, #ffffff 50%, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 40px 70px, #ffffff 50%, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 90px 40px, #ffffff 50%, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 160px 120px, #ffffff 50%, rgba(0,0,0,0));
+      background-repeat: repeat;
+      background-size: 200px 200px;
+      color: #e2e8f0;
       min-height: 100vh;
+      padding: 15px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
     }
-    header {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    header h1 {
-      font-size: 2.2rem;
-      color: #38bdf8;
-      margin-bottom: 8px;
-    }
-    header p {
-      color: #94a3b8;
-      font-size: 1rem;
-    }
-    .search-box {
+
+    .container {
       width: 100%;
-      max-width: 500px;
-      margin-bottom: 25px;
+      max-width: 900px;
     }
+
+    /* Top Selector */
+    .header-select {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
     select {
-      width: 100%;
-      padding: 14px;
+      background: #172038;
+      color: #fff;
+      border: 1px solid #2d3a5e;
+      padding: 10px 20px;
+      border-radius: 20px;
       font-size: 1.1rem;
-      border-radius: 12px;
-      border: 1px solid #334155;
-      background-color: #1e293b;
-      color: #f8fafc;
       outline: none;
       cursor: pointer;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
-    select:focus {
-      border-color: #38bdf8;
-    }
-    .card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid #334155;
-      border-radius: 20px;
-      padding: 30px;
-      width: 100%;
-      max-width: 500px;
+
+    /* Main Temp Section */
+    .main-weather {
       text-align: center;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      margin: 20px 0 30px 0;
     }
-    .city-name {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #f1f5f9;
+
+    .city-title {
+      font-size: 2.2rem;
+      font-weight: 500;
+      color: #ffffff;
       margin-bottom: 5px;
     }
-    .temp {
-      font-size: 4rem;
-      font-weight: 800;
-      color: #38bdf8;
-      margin: 15px 0;
+
+    .current-temp {
+      font-size: 5.5rem;
+      font-weight: 300;
+      color: #ffffff;
+      line-height: 1;
+      margin: 10px 0;
     }
-    .weather-desc {
+
+    .sub-info {
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+
+    .condition-text {
       font-size: 1.3rem;
       color: #cbd5e1;
-      margin-bottom: 25px;
+      margin-top: 5px;
     }
-    .details {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      border-top: 1px solid #334155;
-      padding-top: 20px;
+
+    /* Cards Styling */
+    .card {
+      background: rgba(23, 32, 56, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
-    .detail-item {
-      background: #0f172a;
-      padding: 12px;
-      border-radius: 12px;
-    }
-    .detail-item label {
-      display: block;
-      font-size: 0.8rem;
+
+    .card-title {
+      font-size: 0.95rem;
       color: #94a3b8;
-      margin-bottom: 4px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .detail-item span {
-      font-size: 1.1rem;
+
+    /* Hourly Forecast Scrollable */
+    .hourly-container {
+      display: flex;
+      overflow-x: auto;
+      gap: 18px;
+      padding-bottom: 10px;
+    }
+
+    .hourly-container::-webkit-scrollbar {
+      height: 4px;
+    }
+    .hourly-container::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    .hourly-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 55px;
+      font-size: 0.9rem;
+    }
+
+    .hourly-item .time { color: #94a3b8; margin-bottom: 8px; }
+    .hourly-item .icon { font-size: 1.5rem; margin-bottom: 8px; }
+    .hourly-item .temp { font-weight: 600; color: #f8fafc; }
+
+    /* Daily Forecast Section */
+    .chart-container {
+      height: 180px;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    /* Grid Layout for Metrics */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 15px;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
       font-weight: bold;
-      color: #f8fafc;
+      color: #ffffff;
+      margin: 8px 0;
     }
-    .loading {
-      display: none;
-      font-size: 1.2rem;
-      color: #38bdf8;
-      margin: 20px 0;
+
+    .metric-desc {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* Lifestyle Recommendations Grid */
+    .lifestyle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      text-align: center;
+    }
+
+    .lifestyle-item {
+      background: rgba(15, 23, 42, 0.6);
+      padding: 12px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .lifestyle-item .icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .lifestyle-item .status { font-size: 0.75rem; color: #94a3b8; }
+    .lifestyle-item .title { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; margin-top: 2px; }
+
+    .footer-note {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.8rem;
+      margin-top: 20px;
+      padding-bottom: 20px;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>🇮🇶 طقس العراق المحلي</h1>
-    <p>تابع حالة الطقس الحالية لجميع المحافظات والمناطق العراقية</p>
-  </header>
+  <div class="container">
+    <!-- قائمة اختيار مناطق العراق -->
+    <div class="header-select">
+      <select id="citySelect" onchange="fetchWeatherData()">
+        <optgroup label="العاصمة والمناطق">
+          <option value="33.3676,44.3419">الكاظمية / بغداد 🕌</option>
+          <option value="33.3152,44.3661">بغداد (المركز) 🏛️</option>
+        </optgroup>
+        <optgroup label="المحافظات العراقية">
+          <option value="30.5081,47.7835">البصرة 🌴</option>
+          <option value="36.1911,44.0091">أربيل 🏰</option>
+          <option value="36.3400,43.1300">الموصل (نينوى) 🌉</option>
+          <option value="35.4681,44.3922">كركوك 🛢️</option>
+          <option value="35.5570,45.4329">السليمانية 🏔️</option>
+          <option value="31.9958,44.3148">النجف الأشرف 🕌</option>
+          <option value="32.6160,44.0249">كربلاء المقدسة 🕌</option>
+          <option value="32.4637,44.4209">الحلة (بابل) 🦁</option>
+          <option value="31.0572,46.2573">الناصرية (ذي قار) 🌾</option>
+          <option value="31.8360,47.1450">العمارة (ميسان) 🌊</option>
+          <option value="32.5080,45.8330">الكوت (واسط) 🌾</option>
+          <option value="31.9920,44.9250">الديوانية 🏛️</option>
+          <option value="33.4260,43.3030">الرمادي (الأنبار) 🏜️</option>
+          <option value="33.7540,44.6440">بعقوبة (ديالى) 🍊</option>
+          <option value="34.1980,43.8850">سامراء (صلاح الدين) 🕌</option>
+          <option value="36.8670,42.9880">دهوك ⛰️</option>
+          <option value="31.3170,45.2810">السماوة 🏜️</option>
+        </optgroup>
+      </select>
+    </div>
 
-  <div class="search-box">
-    <select id="citySelect" onchange="getWeather()">
-      <optgroup label="العاصمة والمحافظات الرئيسية">
-        <option value="360630, Baghdad">بغداد</option>
-        <option value="39013, Basra">البصرة</option>
-        <option value="95321, Erbil">أربيل</option>
-        <option value="93507, Mosul">الموصل (نينوى)</option>
-        <option value="94689, Kirkuk">كركوك</option>
-        <option value="95432, Sulaymaniyah">السليمانية</option>
-        <option value="98463, Najaf">النجف الأشرف</option>
-        <option value="98624, Karbala">كربلاء المقدسة</option>
-        <option value="98870, Hilla">الحلة (بابل)</option>
-        <option value="98918, Nasiriyah">الناصرية (ذي قار)</option>
-        <option value="98902, Amarah">العمارة (ميسان)</option>
-        <option value="98884, Kut">الكوت (واسط)</option>
-        <option value="98892, Diwaniyah">الديوانية (القادسية)</option>
-        <option value="98848, Ramadi">الرمادي (الأنبار)</option>
-        <option value="98246, Baqubah">بعقوبة (ديالى)</option>
-        <option value="98539, Samarra">سامراء (صلاح الدين)</option>
-        <option value="98357, Dohuk">دهوك</option>
-        <option value="98858, Samawah">السماوة (المثنى)</option>
-      </optgroup>
-      <optgroup label="مناطق وأقضية إضافية">
-        <option value="98850, Fallujah">الفلوجة</option>
-        <option value="98402, Zakho">زاخو</option>
-        <option value="98845, Hit">هيت</option>
-        <option value="98860, Zubair">الزبير</option>
-      </optgroup>
-    </select>
-  </div>
+    <!-- الطقس الحالي الرئيسية -->
+    <div class="main-weather">
+      <div class="city-title" id="cityName">Kadhimiya</div>
+      <div class="current-temp" id="currentTemp">--°</div>
+      <div class="sub-info">العليا: <span id="maxTemp">--</span>°  الدنيا: <span id="minTemp">--</span>°</div>
+      <div class="condition-text" id="conditionText">مشمس ☀️</div>
+    </div>
 
-  <div class="loading" id="loading">جاري جلب بيانات الطقس...</div>
-
-  <div class="card" id="weatherCard">
-    <div class="city-name" id="cityName">بغداد</div>
-    <div class="temp" id="temperature">--°C</div>
-    <div class="weather-desc" id="weatherCondition">--</div>
-
-    <div class="details">
-      <div class="detail-item">
-        <label>الرطوبة</label>
-        <span id="humidity">--%</span>
+    <!-- الطقس كل ساعة -->
+    <div class="card">
+      <div class="card-title">🕒 الطقس كل ساعة</div>
+      <div class="hourly-container" id="hourlyContainer">
+        <!-- يتم التعبئة بواسطة الكود -->
       </div>
-      <div class="detail-item">
-        <label>سرعة الرياح</label>
-        <span id="wind">-- كم/س</span>
+    </div>
+
+    <!-- توقع الطقس للأيام القادمة والحرارة -->
+    <div class="card">
+      <div class="card-title">📅 توقع الطقس (الأيام القادمة)</div>
+      <div class="chart-container">
+        <canvas id="tempChart"></canvas>
       </div>
-      <div class="detail-item">
-        <label>المحسوسة</label>
-        <span id="feelsLike">--°C</span>
+    </div>
+
+    <!-- بطاقات الرؤية والضغط والرطوبة والشروق -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🌅 الشروق والغروب</div>
+        <div class="metric-value" id="sunriseTime">--:-- ص</div>
+        <div class="metric-desc">غروب الشمس: <span id="sunsetTime">--:-- م</span></div>
       </div>
+
+      <div class="card">
+        <div class="card-title">💧 الرطوبة</div>
+        <div class="metric-value" id="humidityVal">--%</div>
+        <div class="metric-desc" id="humidityDesc">الطقس جاف، احرص على ترطيب جسمك</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👁️ الرؤية الأفقیة</div>
+        <div class="metric-value" id="visibilityVal">-- كم</div>
+        <div class="metric-desc">رؤية ممتازة ومجال واضح</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⏲️ الضغط الجوي</div>
+        <div class="metric-value" id="pressureVal">-- hPa</div>
+        <div class="metric-desc">ضغط الهواء طبيعي، الطقس مريح</div>
+      </div>
+    </div>
+
+    <!-- مؤشرات نمط الحياة والتوصيات -->
+    <div class="card">
+      <div class="card-title">🚴 مؤشرات نمط الحياة والأنشطة</div>
+      <div class="lifestyle-grid">
+        <div class="lifestyle-item">
+          <div class="icon">🏃</div>
+          <div class="status" id="runStatus">مناسب</div>
+          <div class="title">الجري والرياضة</div>
+        </div>
+        <div class="lifestyle-item">
+          <div class="icon">🎣</div>
+          <div class="status" id="fishStatus">غير مناسب</div>
+          <div class="title">صيد السمك</div>
+        </div>
+        <div class="lifestyle-item">
+          <div class="icon">🔭</div>
+          <div class="status" id="starStatus">مثالي</div>
+          <div class="title">مراقبة النجوم</div>
+        </div>
+        <div class="lifestyle-item">
+          <div class="icon">💆</div>
+          <div class="status">احتمالية ضئيلة</div>
+          <div class="title">تجهد الشعر</div>
+        </div>
+        <div class="lifestyle-item">
+          <div class="icon">✈️</div>
+          <div class="status">لا تأخيرات</div>
+          <div class="title">الرحلات الجوية</div>
+        </div>
+        <div class="lifestyle-item">
+          <div class="icon">🌙</div>
+          <div class="status" id="moonStatus">بدر</div>
+          <div class="title">مرحلة القمر</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      البيانات مقدمة مباشرة عن طريق Open-Meteo API | طقس العراق 🇮🇶
     </div>
   </div>
 
   <script>
-    // ترجمة حالات الطقس إلى العربية
-    const weatherTranslations = {
-      0: "سماء صافية ☀️",
-      1: "صافٍ بوجه عام 🌤️", 2: "غيوم جزئية ⛅", 3: "غائم ☁️",
-      45: "ضباب 🌫️", 48: "ضباب صقيعي 🌫️",
-      51: "رذاذ خفيف 🌧️", 53: "رذاذ متوسط 🌧️", 55: "رذاذ كثيف 🌧️",
-      61: "مطر خفيف 🌧️", 63: "مطر متوسط 🌧️", 65: "مطر غزير 🌧️",
-      71: "ثلج خفيف ❄️", 73: "ثلج متوسط ❄️", 75: "ثلج غزير ❄️",
-      80: "زخات مطر خفيفة 🌦️", 81: "زخات مطر متوسطة 🌦️", 82: "زخات مطر قوية 🌧️",
-      95: "عاصفة رعدية 🌩️", 96: "عاصفة رعدية مع برد خفيف ⛈️", 99: "عاصفة رعدية مع برد غزير ⛈️"
-    };
+    let tempChartInstance = null;
 
-    async function getWeather() {
+    // خرائط الإيموجي للطقس
+    function getWeatherEmoji(code, isDay = 1) {
+      if (code === 0) return isDay ? "☀️ مشمس" : "🌙 صافٍ";
+      if (code === 1 || code === 2) return isDay ? "🌤️ صافٍ بوجه عام" : "🌤️ غائم جزئياً";
+      if (code === 3) return "☁️ غائم";
+      if (code >= 45 && code <= 48) return "🌫️ ضباب";
+      if (code >= 51 && code <= 65) return "🌧️ مطر";
+      if (code >= 71 && code <= 77) return "❄️ ثلج/بارد جداً";
+      if (code >= 80 && code <= 82) return "🌦️ زخات مطر";
+      if (code >= 95) return "🌩️ عاصفة رعدية";
+      return "☀️ مشمس";
+    }
+
+    async function fetchWeatherData() {
       const select = document.getElementById("citySelect");
-      const [id, name] = select.value.split(", ");
-      const selectedText = select.options[select.selectedIndex].text;
-
-      const loading = document.getElementById("loading");
-      const card = document.getElementById("weatherCard");
-
-      loading.style.display = "block";
-      card.style.opacity = "0.4";
+      const [lat, lon] = select.value.split(",");
+      const cityName = select.options[select.selectedIndex].text.split(" ")[0];
+      
+      document.getElementById("cityName").innerText = cityName;
 
       try {
-        // استخدام Open-Meteo API (مجاني ولا يحتاج API Key)
-        // الحصول على إحداثيات المدينة أولاً
-        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=ar&format=json`;
-        const geoRes = await fetch(geoUrl);
-        const geoData = await geoRes.json();
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,is_day,weather_code,surface_pressure,wind_speed_10m&hourly=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code&timezone=auto`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
 
-        if (geoData.results && geoData.results.length > 0) {
-          const { latitude, longitude } = geoData.results[0];
-          
-          // جلب بيانات الطقس
-          const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`;
-          const weatherRes = await fetch(weatherUrl);
-          const weatherData = await weatherRes.json();
+        // 1. الطقس الحالي
+        const current = data.current;
+        const currentTemp = Math.round(current.temperature_2m);
+        document.getElementById("currentTemp").innerText = `${currentTemp}°`;
+        document.getElementById("maxTemp").innerText = Math.round(data.daily.temperature_2m_max[0]);
+        document.getElementById("minTemp").innerText = Math.round(data.daily.temperature_2m_min[0]);
+        
+        const cond = getWeatherEmoji(current.weather_code, current.is_day);
+        document.getElementById("conditionText").innerText = cond;
 
-          const current = weatherData.current;
+        // 2. الساعات
+        const hourlyContainer = document.getElementById("hourlyContainer");
+        hourlyContainer.innerHTML = "";
+        
+        for (let i = 0; i < 24; i += 2) {
+          const time = new Date(data.hourly.time[i]).getHours() + ":00";
+          const temp = Math.round(data.hourly.temperature_2m[i]);
+          const emoji = getWeatherEmoji(data.hourly.weather_code[i], data.hourly.is_day[i]).split(" ")[0];
 
-          // تحديث الواجهة
-          document.getElementById("cityName").innerText = selectedText;
-          document.getElementById("temperature").innerText = `${Math.round(current.temperature_2m)}°C`;
-          document.getElementById("feelsLike").innerText = `${Math.round(current.apparent_temperature)}°C`;
-          document.getElementById("humidity").innerText = `${current.relative_humidity_2m}%`;
-          document.getElementById("wind").innerText = `${Math.round(current.wind_speed_10m)} كم/س`;
-          
-          const code = current.weather_code;
-          document.getElementById("weatherCondition").innerText = weatherTranslations[code] || "غير محدد";
+          hourlyContainer.innerHTML += `
+            <div class="hourly-item">
+              <div class="time">${time}</div>
+              <div class="icon">${emoji}</div>
+              <div class="temp">${temp}°</div>
+            </div>
+          `;
         }
-      } catch (error) {
-        alert("حدث خطأ أثناء جلب بيانات الطقس، يرجى المحاولة لاحقاً.");
-      } finally {
-        loading.style.display = "none";
-        card.style.opacity = "1";
+
+        // 3. الشروق، الغروب، الرطوبة، الضغط
+        const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'});
+        const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'});
+        
+        document.getElementById("sunriseTime").innerText = sunrise;
+        document.getElementById("sunsetTime").innerText = sunset;
+        document.getElementById("humidityVal").innerText = `${current.relative_humidity_2m}%`;
+        document.getElementById("pressureVal").innerText = `${Math.round(current.surface_pressure)} hPa`;
+        document.getElementById("visibilityVal").innerText = `10 كم`;
+
+        // تعديل حالة الأنشطة حسب الحرارة
+        if (currentTemp > 38) {
+          document.getElementById("runStatus").innerText = "غير مناسب 🥵";
+          document.getElementById("humidityDesc").innerText = "الطقس حار جداً، اشرب الكثير من الماء";
+        } else if (currentTemp < 15) {
+          document.getElementById("runStatus").innerText = "بارد 🥶";
+          document.getElementById("humidityDesc").innerText = "الطقس بارد، ارتدي ملابس دافئة";
+        } else {
+          document.getElementById("runStatus").innerText = "ممتاز 🏃";
+          document.getElementById("humidityDesc").innerText = "الطقس معتدل ومريح";
+        }
+
+        // 4. الرسم البياني لـ 7 أيام
+        renderDailyChart(data.daily);
+
+      } catch (err) {
+        console.error("Error loading weather data", err);
       }
     }
 
-    // جلب طقس بغداد تلقائياً عند فتح الموقع
-    window.onload = getWeather;
+    function renderDailyChart(dailyData) {
+      const ctx = document.getElementById('tempChart').getContext('2d');
+      const labels = dailyData.time.map(t => {
+        const d = new Date(t);
+        return d.toLocaleDateString('ar-IQ', { weekday: 'short' });
+      });
+
+      if (tempChartInstance) {
+        tempChartInstance.destroy();
+      }
+
+      tempChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'العليا',
+              data: dailyData.temperature_2m_max,
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
+              tension: 0.4,
+              borderWidth: 3,
+              pointBackgroundColor: '#f59e0b'
+            },
+            {
+              label: 'الدنيا',
+              data: dailyData.temperature_2m_min,
+              borderColor: '#38bdf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.1)',
+              tension: 0.4,
+              borderWidth: 3,
+              pointBackgroundColor: '#38bdf8'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+            y: { display: false }
+          }
+        }
+      });
+    }
+
+    // جلب البيانات فور فتح التطبيق
+    window.onload = fetchWeatherData;
   </script>
 </body>
 </html>
