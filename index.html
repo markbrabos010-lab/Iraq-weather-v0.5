@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طقس العراق - Iraq Weather</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    header h1 {
+      font-size: 2.2rem;
+      color: #38bdf8;
+      margin-bottom: 8px;
+    }
+    header p {
+      color: #94a3b8;
+      font-size: 1rem;
+    }
+    .search-box {
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 25px;
+    }
+    select {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      background-color: #1e293b;
+      color: #f8fafc;
+      outline: none;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+    }
+    select:focus {
+      border-color: #38bdf8;
+    }
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid #334155;
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+    .city-name {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #f1f5f9;
+      margin-bottom: 5px;
+    }
+    .temp {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #38bdf8;
+      margin: 15px 0;
+    }
+    .weather-desc {
+      font-size: 1.3rem;
+      color: #cbd5e1;
+      margin-bottom: 25px;
+    }
+    .details {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      border-top: 1px solid #334155;
+      padding-top: 20px;
+    }
+    .detail-item {
+      background: #0f172a;
+      padding: 12px;
+      border-radius: 12px;
+    }
+    .detail-item label {
+      display: block;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .detail-item span {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #f8fafc;
+    }
+    .loading {
+      display: none;
+      font-size: 1.2rem;
+      color: #38bdf8;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🇮🇶 طقس العراق المحلي</h1>
+    <p>تابع حالة الطقس الحالية لجميع المحافظات والمناطق العراقية</p>
+  </header>
+
+  <div class="search-box">
+    <select id="citySelect" onchange="getWeather()">
+      <optgroup label="العاصمة والمحافظات الرئيسية">
+        <option value="360630, Baghdad">بغداد</option>
+        <option value="39013, Basra">البصرة</option>
+        <option value="95321, Erbil">أربيل</option>
+        <option value="93507, Mosul">الموصل (نينوى)</option>
+        <option value="94689, Kirkuk">كركوك</option>
+        <option value="95432, Sulaymaniyah">السليمانية</option>
+        <option value="98463, Najaf">النجف الأشرف</option>
+        <option value="98624, Karbala">كربلاء المقدسة</option>
+        <option value="98870, Hilla">الحلة (بابل)</option>
+        <option value="98918, Nasiriyah">الناصرية (ذي قار)</option>
+        <option value="98902, Amarah">العمارة (ميسان)</option>
+        <option value="98884, Kut">الكوت (واسط)</option>
+        <option value="98892, Diwaniyah">الديوانية (القادسية)</option>
+        <option value="98848, Ramadi">الرمادي (الأنبار)</option>
+        <option value="98246, Baqubah">بعقوبة (ديالى)</option>
+        <option value="98539, Samarra">سامراء (صلاح الدين)</option>
+        <option value="98357, Dohuk">دهوك</option>
+        <option value="98858, Samawah">السماوة (المثنى)</option>
+      </optgroup>
+      <optgroup label="مناطق وأقضية إضافية">
+        <option value="98850, Fallujah">الفلوجة</option>
+        <option value="98402, Zakho">زاخو</option>
+        <option value="98845, Hit">هيت</option>
+        <option value="98860, Zubair">الزبير</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div class="loading" id="loading">جاري جلب بيانات الطقس...</div>
+
+  <div class="card" id="weatherCard">
+    <div class="city-name" id="cityName">بغداد</div>
+    <div class="temp" id="temperature">--°C</div>
+    <div class="weather-desc" id="weatherCondition">--</div>
+
+    <div class="details">
+      <div class="detail-item">
+        <label>الرطوبة</label>
+        <span id="humidity">--%</span>
+      </div>
+      <div class="detail-item">
+        <label>سرعة الرياح</label>
+        <span id="wind">-- كم/س</span>
+      </div>
+      <div class="detail-item">
+        <label>المحسوسة</label>
+        <span id="feelsLike">--°C</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ترجمة حالات الطقس إلى العربية
+    const weatherTranslations = {
+      0: "سماء صافية ☀️",
+      1: "صافٍ بوجه عام 🌤️", 2: "غيوم جزئية ⛅", 3: "غائم ☁️",
+      45: "ضباب 🌫️", 48: "ضباب صقيعي 🌫️",
+      51: "رذاذ خفيف 🌧️", 53: "رذاذ متوسط 🌧️", 55: "رذاذ كثيف 🌧️",
+      61: "مطر خفيف 🌧️", 63: "مطر متوسط 🌧️", 65: "مطر غزير 🌧️",
+      71: "ثلج خفيف ❄️", 73: "ثلج متوسط ❄️", 75: "ثلج غزير ❄️",
+      80: "زخات مطر خفيفة 🌦️", 81: "زخات مطر متوسطة 🌦️", 82: "زخات مطر قوية 🌧️",
+      95: "عاصفة رعدية 🌩️", 96: "عاصفة رعدية مع برد خفيف ⛈️", 99: "عاصفة رعدية مع برد غزير ⛈️"
+    };
+
+    async function getWeather() {
+      const select = document.getElementById("citySelect");
+      const [id, name] = select.value.split(", ");
+      const selectedText = select.options[select.selectedIndex].text;
+
+      const loading = document.getElementById("loading");
+      const card = document.getElementById("weatherCard");
+
+      loading.style.display = "block";
+      card.style.opacity = "0.4";
+
+      try {
+        // استخدام Open-Meteo API (مجاني ولا يحتاج API Key)
+        // الحصول على إحداثيات المدينة أولاً
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=ar&format=json`;
+        const geoRes = await fetch(geoUrl);
+        const geoData = await geoRes.json();
+
+        if (geoData.results && geoData.results.length > 0) {
+          const { latitude, longitude } = geoData.results[0];
+          
+          // جلب بيانات الطقس
+          const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`;
+          const weatherRes = await fetch(weatherUrl);
+          const weatherData = await weatherRes.json();
+
+          const current = weatherData.current;
+
+          // تحديث الواجهة
+          document.getElementById("cityName").innerText = selectedText;
+          document.getElementById("temperature").innerText = `${Math.round(current.temperature_2m)}°C`;
+          document.getElementById("feelsLike").innerText = `${Math.round(current.apparent_temperature)}°C`;
+          document.getElementById("humidity").innerText = `${current.relative_humidity_2m}%`;
+          document.getElementById("wind").innerText = `${Math.round(current.wind_speed_10m)} كم/س`;
+          
+          const code = current.weather_code;
+          document.getElementById("weatherCondition").innerText = weatherTranslations[code] || "غير محدد";
+        }
+      } catch (error) {
+        alert("حدث خطأ أثناء جلب بيانات الطقس، يرجى المحاولة لاحقاً.");
+      } finally {
+        loading.style.display = "none";
+        card.style.opacity = "1";
+      }
+    }
+
+    // جلب طقس بغداد تلقائياً عند فتح الموقع
+    window.onload = getWeather;
+  </script>
+</body>
+</html>
